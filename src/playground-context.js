@@ -1,6 +1,7 @@
 import { conceptById } from './data.js';
 
 const STORAGE_KEY = 'aimg-practice-context';
+let enhanceScheduled = false;
 
 const labForConcept = concept => {
   if (!concept) return 'loop';
@@ -32,8 +33,8 @@ function currentConceptId() {
 }
 
 function escapeHtml(value = '') {
-  return String(value).replace(/[&<>'"]/g, char => ({
-    '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
+  return String(value).replace(/[&<>'\"]/g, char => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '\"':'&quot;'
   }[char]));
 }
 
@@ -112,6 +113,7 @@ function updateProgress(type) {
   if (type === 'approval') context.progress.decisions = 1;
   if (type === 'loop') context.progress.loopSteps = (context.progress.loopSteps || 0) + 1;
   writeContext(context);
+  scheduleEnhance();
 }
 
 function enhanceConceptPage() {
@@ -122,8 +124,12 @@ function enhanceConceptPage() {
 
   const button = document.querySelector('.practice-box [data-nav="playground"]');
   if (!button) return;
-  button.textContent = 'Try this concept →';
-  button.setAttribute('aria-label', `Open an interactive exercise for ${concept.title}`);
+
+  if (button.textContent !== 'Try this concept →') {
+    button.textContent = 'Try this concept →';
+  }
+  const label = `Open an interactive exercise for ${concept.title}`;
+  if (button.getAttribute('aria-label') !== label) button.setAttribute('aria-label', label);
 
   const box = button.closest('.practice-box');
   if (box && !box.querySelector('.practice-expectation')) {
@@ -157,23 +163,26 @@ function injectPracticeCard() {
   const concept = conceptById[context.id];
   if (!concept) return;
 
-  if (ensureCorrectLab(context)) {
-    queueMicrotask(injectPracticeCard);
-    return;
-  }
+  if (ensureCorrectLab(context)) return;
 
   const playContent = document.querySelector('.play-content');
   if (!playContent) return;
-
-  const existing = playContent.querySelector('.context-practice-card');
-  if (existing) existing.remove();
 
   const challenge = challengeFor(concept, context.lab);
   const progress = Math.min(progressFor(context), challenge.target);
   const complete = progress >= challenge.target;
   const percent = Math.round((progress / challenge.target) * 100);
+  const signature = `${context.id}:${context.lab}:${progress}:${challenge.target}:${complete}`;
 
-  const card = document.createElement('section');
+  let card = playContent.querySelector('.context-practice-card');
+  if (card?.dataset.signature === signature) return;
+  if (!card) {
+    card = document.createElement('section');
+    card.className = 'context-practice-card';
+    playContent.prepend(card);
+  }
+
+  card.dataset.signature = signature;
   card.className = `context-practice-card ${complete ? 'is-complete' : ''}`;
   card.innerHTML = `
     <div class="context-practice-head">
@@ -195,7 +204,6 @@ function injectPracticeCard() {
       </div>
     </div>`;
 
-  playContent.prepend(card);
   card.querySelector('[data-context-back]')?.addEventListener('click', () => {
     location.hash = `#/concept/${context.id}`;
   });
@@ -257,17 +265,26 @@ document.addEventListener('submit', event => {
   if (event.target.matches('[data-rag-form]')) updateProgress('rag');
 }, true);
 
-const app = document.querySelector('#app');
-if (app) {
-  const observer = new MutationObserver(() => queueMicrotask(enhance));
-  observer.observe(app, { childList: true, subtree: true });
-}
-
 function enhance() {
   addStyles();
   enhanceConceptPage();
   injectPracticeCard();
 }
 
-window.addEventListener('hashchange', () => queueMicrotask(enhance));
-queueMicrotask(enhance);
+function scheduleEnhance() {
+  if (enhanceScheduled) return;
+  enhanceScheduled = true;
+  requestAnimationFrame(() => {
+    enhanceScheduled = false;
+    enhance();
+  });
+}
+
+const app = document.querySelector('#app');
+if (app) {
+  const observer = new MutationObserver(scheduleEnhance);
+  observer.observe(app, { childList: true, subtree: true });
+}
+
+window.addEventListener('hashchange', scheduleEnhance);
+scheduleEnhance();
