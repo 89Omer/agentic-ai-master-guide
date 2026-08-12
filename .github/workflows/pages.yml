@@ -2,7 +2,7 @@ name: Deploy Agentic AI Master Guide to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
