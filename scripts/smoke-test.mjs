@@ -1,9 +1,13 @@
 import { readFile } from 'node:fs/promises';
 const data=await readFile('src/data.js','utf8');
+const base=await readFile('src/data-base.js','utf8');
+const production=await readFile('src/production-concepts.js','utf8');
 const app=await readFile('src/app.js','utf8');
 const css=await readFile('src/styles.css','utf8');
 const checks=[
-  ['core concept data', data.includes("'loop-engineering'") && data.includes("'mcp'") && data.includes("'agent-evaluation'")],
+  ['core concept data', base.includes("'loop-engineering'") && base.includes("'mcp'") && base.includes("'agent-evaluation'")],
+  ['production concept data', production.includes("'harness-engineering'") && production.includes("'ag-ui'") && production.includes("'context-compaction'") && production.includes("'adversarial-evaluation'")],
+  ['expanded data integration', data.includes('productionConceptRows') && data.includes('agentEngineeringCategory') && data.includes('baseConcepts')],
   ['learning paths', data.includes('learningPaths')],
   ['projects', data.includes('projects')],
   ['quiz', data.includes('quizzes')],
