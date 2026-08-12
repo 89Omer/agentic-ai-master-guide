@@ -1,0 +1,10 @@
+import { access, cp, mkdir, rm, writeFile } from 'node:fs/promises';
+const required=['index.html','src/app.js','src/data.js','src/styles.css','public/assets/hero-orb-cube.png'];
+for(const file of required) await access(file);
+await rm('dist',{recursive:true,force:true});
+await mkdir('dist',{recursive:true});
+await cp('index.html','dist/index.html');
+await cp('src','dist/src',{recursive:true});
+await cp('public','dist/public',{recursive:true});
+await writeFile('dist/.nojekyll','');
+console.log('Built static GitHub Pages site in dist/.');
