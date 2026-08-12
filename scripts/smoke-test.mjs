@@ -11,9 +11,14 @@ const researchState=await readFile('src/research-state.js','utf8');
 const researchA=await readFile('src/research-stations-a.js','utf8');
 const researchB=await readFile('src/research-stations-b.js','utf8');
 const researchCss=await readFile('src/research-lab.css','utf8');
+const analytics=await readFile('src/analytics.js','utf8');
+const analyticsConfig=await readFile('src/analytics-config.js','utf8');
+const analyticsCss=await readFile('src/analytics.css','utf8');
+const buildPopular=await readFile('scripts/build-popular.mjs','utf8');
+const packageJson=await readFile('package.json','utf8');
 const index=await readFile('index.html','utf8');
 const css=await readFile('src/styles.css','utf8');
-for(const file of ['src/research-state.js','src/research-stations-a.js','src/research-stations-b.js','src/research-experiments.js','src/research-concept-mode.js','src/research-lab.js']) execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
+for(const file of ['src/research-state.js','src/research-stations-a.js','src/research-stations-b.js','src/research-experiments.js','src/research-concept-mode.js','src/research-lab.js','src/analytics-config.js','src/analytics.js','scripts/build-popular.mjs']) execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
 const checks=[
   ['core concept data', base.includes("'loop-engineering'") && base.includes("'mcp'") && base.includes("'agent-evaluation'")],
   ['production concept data', production.includes("'harness-engineering'") && production.includes("'ag-ui'") && production.includes("'context-compaction'") && production.includes("'adversarial-evaluation'")],
@@ -32,6 +37,11 @@ const checks=[
   ['research concept modes', research.includes('research-concept-mode.js') && researchState.includes('stationForConcept')],
   ['research lab loaded', index.includes('research-lab.js') && index.includes('research-lab.css')],
   ['research responsive CSS', researchCss.includes('@media(max-width:760px)')],
+  ['analytics config', analyticsConfig.includes("provider: 'goatcounter'") && analyticsConfig.includes('respectDoNotTrack') && analyticsConfig.includes('siteCode')],
+  ['analytics tracking', analytics.includes('window.goatcounter.count') && analytics.includes('trackCurrentRoute') && analytics.includes('enhanceConceptCount')],
+  ['Most Read UI', analytics.includes('enhanceMostRead') && analytics.includes('enhancePopularSort') && analyticsCss.includes('analytics-most-read')],
+  ['Most Read build', buildPopular.includes('analytics-popular.json') && buildPopular.includes('concepts.length') && packageJson.includes('build-popular.mjs')],
+  ['analytics loaded', index.includes('analytics.js') && index.includes('analytics.css')],
   ['responsive CSS', css.includes('@media (max-width:760px)')],
   ['Aptos stack', css.includes('Aptos')]
 ];
