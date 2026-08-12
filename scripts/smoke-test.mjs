@@ -3,6 +3,8 @@ const data=await readFile('src/data.js','utf8');
 const base=await readFile('src/data-base.js','utf8');
 const production=await readFile('src/production-concepts.js','utf8');
 const app=await readFile('src/app.js','utf8');
+const playground=await readFile('src/playground-context.js','utf8');
+const index=await readFile('index.html','utf8');
 const css=await readFile('src/styles.css','utf8');
 const checks=[
   ['core concept data', base.includes("'loop-engineering'") && base.includes("'mcp'") && base.includes("'agent-evaluation'")],
@@ -13,6 +15,8 @@ const checks=[
   ['quiz', data.includes('quizzes')],
   ['guide search', app.includes('askGuide') && app.includes('scoreConcepts')],
   ['playground', app.includes('loopLab') && app.includes('toolRouterLab') && app.includes('ragLab') && app.includes('approvalLab')],
+  ['contextual playground', playground.includes('openConceptPractice') && playground.includes('challengeFor') && playground.includes('Practice complete')],
+  ['contextual playground loaded', index.includes('playground-context.js')],
   ['responsive CSS', css.includes('@media (max-width:760px)')],
   ['Aptos stack', css.includes('Aptos')]
 ];
