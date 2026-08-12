@@ -11,7 +11,7 @@ An open-source, interactive learning guide that teaches Agentic AI from first pr
 - **Simple, Developer, and Research** depth modes on concept pages, including implementation prompts, research questions, evaluation methods, maturity labels, and suggested references.
 - Interactive **Agent Loop, Tool Routing, RAG, and Human Approval** playgrounds.
 - A browser-local **Research Lab** with Agent Observatory, Tool A/B testing, Planning Strategy comparison, Repeated-Run reliability evaluation, adversarial failure experiments, and a Long-Horizon changing-environment simulation.
-- Research-lab experiments expose **hypotheses, variables, trajectories, task success, groundedness, constraints, iterations, token/cost estimates, failure examples, and recovery behaviour**.
+- Optional shared **read counts and Most Read analytics** using GoatCounter, with no analytics enabled until a site code is configured.
 - **11 guided projects** and a built-in quiz.
 - Modern production topics including **Harness Engineering, Context Compaction, Agent Skills, Long-Running Agents, Durable Execution, MCP lifecycle features, A2A, AG-UI, Agent Runtime, Guardrails, Red-Team Evaluation, and Agent Drift**.
 - Responsive desktop/mobile UI and hash routing that works on GitHub Pages.
@@ -34,7 +34,7 @@ npm test
 npm run build
 ```
 
-The smoke tests validate the core guide, RAG answer layer, research-lab modules, and JavaScript syntax before deployment. The build command creates a deployable `dist/` directory.
+The smoke tests validate the core guide, RAG answer layer, Research Lab, analytics modules, and JavaScript syntax before deployment. The build command creates a deployable `dist/` directory and, when analytics is configured, refreshes the Most Read dataset.
 
 ## Deploy to GitHub Pages
 
@@ -63,6 +63,20 @@ The initial stations are:
 
 These are transparent browser simulations designed to teach architecture and evaluation. They do not claim to reproduce the stochastic behaviour of a specific hosted LLM.
 
+## Views and Most Read analytics
+
+Analytics is **disabled by default**. Once a GoatCounter site code is configured, the guide can show:
+
+- concept-level read counts
+- total recorded site reads in the footer
+- a **Most Read** homepage section
+- **Most read** sorting in Explore Concepts
+- SPA pageview tracking for the guide's hash routes
+
+The Pages workflow also runs every six hours so the cached Most Read ranking can refresh without requiring a code change.
+
+See **`ANALYTICS-SETUP.md`** for the one-time setup and configuration options.
+
 ## Font
 
 The design uses this CSS font stack:
@@ -83,8 +97,11 @@ Aptos is **not bundled** with this repository. Devices that already have Aptos i
 - `src/research-state.js` — shared research-lab state and experiment metadata.
 - `src/research-stations-a.js` / `src/research-stations-b.js` — experiment stations.
 - `src/research-experiments.js` — station routing and event binding.
-- `src/research-concept-mode.js` — Simple / Developer / Research lesson modes and research-lab entry points.
+- `src/research-concept-mode.js` — Simple / Developer / Research lesson modes and Research Lab entry points.
 - `src/research-lab.js` / `src/research-lab.css` — Research Lab page integration and visual layer.
+- `src/analytics-config.js` — optional public analytics configuration.
+- `src/analytics.js` / `src/analytics.css` — SPA tracking, concept counts, site totals, Most Read UI, and popularity sorting.
+- `scripts/build-popular.mjs` — build-time aggregation of weekly concept counts.
 
 ## Guide behavior
 
