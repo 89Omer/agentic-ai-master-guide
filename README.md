@@ -4,12 +4,13 @@ An open-source, interactive learning guide that teaches Agentic AI from first pr
 
 ## What is included
 
-- **136 connected concepts** across AI foundations, agents, tools and MCP, memory and RAG, loop engineering, multi-agent systems, safety, and evaluation.
+- **183 connected concepts** across AI foundations, agents, tools/protocols/interoperability, memory and RAG, loop engineering, multi-agent systems, agent engineering, safety, and evaluation.
 - A **local Guide** that maps natural-language questions to relevant concepts without an API key or backend.
 - **Beginner, Developer, and Researcher** learning paths with browser-saved progress.
 - Concept lessons using a consistent teaching pattern: explanation, why it matters, how it works, visual model, example, failure mode, practice, and next concepts.
 - Interactive **Agent Loop, Tool Routing, RAG, and Human Approval** playgrounds.
-- **8 guided projects** and a built-in quiz.
+- **11 guided projects** and a built-in quiz.
+- Modern production topics including **Harness Engineering, Context Compaction, Agent Skills, Long-Running Agents, Durable Execution, MCP lifecycle features, A2A, AG-UI, Agent Runtime, Guardrails, Red-Team Evaluation, and Agent Drift**.
 - Responsive desktop/mobile UI and hash routing that works on GitHub Pages.
 - Zero runtime dependencies and no exposed AI provider keys.
 
@@ -40,10 +41,10 @@ The build command creates a deployable `dist/` directory.
 
 ## Deploy to GitHub Pages
 
-1. Create a GitHub repository and push this project to the `main` branch.
+1. Push this project to the repository's `master` branch.
 2. In the repository, open **Settings → Pages**.
 3. Set **Source** to **GitHub Actions**.
-4. Push to `main` or manually run the included **Deploy Agentic AI Master Guide to GitHub Pages** workflow.
+4. Push to `master` or manually run the included **Deploy Agentic AI Master Guide to GitHub Pages** workflow.
 5. GitHub will publish the generated `dist/` site.
 
 The app uses hash routes (`#/concept/...`) so direct navigation works on project GitHub Pages without server rewrite rules.
@@ -60,7 +61,13 @@ Aptos is **not bundled** with this repository. Devices that already have Aptos i
 
 ## Content architecture
 
-Concept content lives in `src/data.js`. A concept includes:
+The content system is intentionally split so the original core remains easy to maintain while newer production-agent concepts can evolve independently:
+
+- `src/data-base.js` — original foundations, learning paths, projects, quizzes, and detailed concept explanations.
+- `src/production-concepts.js` — modern production Agentic AI, protocol, runtime, interoperability, guardrail, and evaluation concepts.
+- `src/data.js` — integration layer that combines both sources into the live knowledge graph, updates learning paths, and adds advanced projects/quizzes.
+
+A concept includes:
 
 - title and short definition
 - level and category
@@ -72,8 +79,6 @@ Concept content lives in `src/data.js`. A concept includes:
 - common mistake
 - when to use it
 - practice task
-
-Learning paths, projects, quizzes, and quick prompts are defined in the same file so contributors can extend the guide without changing the rendering system.
 
 ## Guide behavior
 
@@ -105,7 +110,9 @@ agentic-ai-master-guide/
 │   └── smoke-test.mjs
 ├── src/
 │   ├── app.js
+│   ├── data-base.js
 │   ├── data.js
+│   ├── production-concepts.js
 │   └── styles.css
 ├── index.html
 ├── CONTRIBUTING.md
@@ -116,4 +123,4 @@ agentic-ai-master-guide/
 
 ## Roadmap
 
-Useful next additions include richer diagram libraries, more project-specific sandboxes, optional server-backed AI tutoring, concept-level citations/references, importable community lesson packs, and accessibility/localisation passes.
+Useful next additions include richer concept-specific diagrams, deeper simulations for long-running agents and protocols, optional server-backed AI tutoring, concept-level citations/references, importable community lesson packs, and accessibility/localisation passes.
