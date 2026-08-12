@@ -60,7 +60,7 @@ function topNav(active) {
         <button class="nav-link ${active === 'concepts' ? 'is-active' : ''}" data-nav="concepts">Explore Concepts</button>
         <button class="nav-link ${active === 'paths' ? 'is-active' : ''}" data-nav="paths">Learning Paths</button>
         <button class="nav-link ${active === 'playground' ? 'is-active' : ''}" data-nav="playground">Playground</button>
-        <a class="nav-link github-link" href="https://github.com/" target="_blank" rel="noreferrer">${icon('github')} GitHub</a>
+        <a class="nav-link github-link" href="https://github.com/89Omer/agentic-ai-master-guide" target="_blank" rel="noreferrer">${icon('github')} GitHub</a>
         <button class="primary-button compact" data-nav="paths">Start Learning <span>→</span></button>
       </nav>
       <button class="mobile-menu" data-mobile-menu aria-expanded="false">Menu</button>
