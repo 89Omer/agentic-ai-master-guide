@@ -5,6 +5,7 @@ const base=await readFile('src/data-base.js','utf8');
 const production=await readFile('src/production-concepts.js','utf8');
 const app=await readFile('src/app.js','utf8');
 const playground=await readFile('src/playground-context.js','utf8');
+const playgroundHealth=await readFile('src/playground-health.js','utf8');
 const ragUpgrade=await readFile('src/rag-lab-upgrade.js','utf8');
 const research=await readFile('src/research-lab.js','utf8');
 const researchState=await readFile('src/research-state.js','utf8');
@@ -18,7 +19,7 @@ const buildPopular=await readFile('scripts/build-popular.mjs','utf8');
 const packageJson=await readFile('package.json','utf8');
 const index=await readFile('index.html','utf8');
 const css=await readFile('src/styles.css','utf8');
-for(const file of ['src/research-state.js','src/research-stations-a.js','src/research-stations-b.js','src/research-experiments.js','src/research-concept-mode.js','src/research-lab.js','src/analytics-config.js','src/analytics.js','scripts/build-popular.mjs']) execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
+for(const file of ['src/research-state.js','src/research-stations-a.js','src/research-stations-b.js','src/research-experiments.js','src/research-concept-mode.js','src/research-lab.js','src/analytics-config.js','src/analytics.js','src/playground-health.js','scripts/build-popular.mjs']) execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
 const checks=[
   ['core concept data', base.includes("'loop-engineering'") && base.includes("'mcp'") && base.includes("'agent-evaluation'")],
   ['production concept data', production.includes("'harness-engineering'") && production.includes("'ag-ui'") && production.includes("'context-compaction'") && production.includes("'adversarial-evaluation'")],
@@ -30,6 +31,8 @@ const checks=[
   ['playground', app.includes('loopLab') && app.includes('toolRouterLab') && app.includes('ragLab') && app.includes('approvalLab')],
   ['contextual playground', playground.includes('openConceptPractice') && playground.includes('challengeFor') && playground.includes('Practice complete')],
   ['contextual playground loaded', index.includes('playground-context.js')],
+  ['playground fallback controller', playgroundHealth.includes('fallbackTool') && playgroundHealth.includes('fallbackApproval') && playgroundHealth.includes('fallbackLoopStep') && playgroundHealth.includes("event.preventDefault()")],
+  ['playground fallback loaded', index.includes('playground-health.js')],
   ['RAG question answering', ragUpgrade.includes('RAG does not use one mandatory database') && ragUpgrade.includes('vector store') && ragUpgrade.includes('renderResult')],
   ['RAG upgrade loaded', index.includes('rag-lab-upgrade.js')],
   ['research lab route', research.includes('renderResearchLab') && research.includes('AGENT BEHAVIOUR LABORATORY')],
