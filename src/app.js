@@ -1,4 +1,6 @@
 import { categories, concepts, conceptById, learningPaths, projects, quizzes, quickPrompts, coreRibbon } from './data.js';
+import { builderPage, bindBuilder } from './builder.js';
+import { TEMPLATES, templateForConcept } from './builder-templates.js';
 
 const app = document.querySelector('#app');
 const iconBase = './public/assets/icons/';
@@ -10,10 +12,7 @@ const state = {
   recent: JSON.parse(storageGet('aimg-recent')),
   assistant: null,
   conceptFilter: { q: '', category: 'all', level: 'all' },
-  quiz: { index: 0, score: 0, selected: null, finished: false },
-  playgroundTab: 'loop',
-  loop: { step: 0, iteration: 1, max: 4, successAt: 3, running: false, log: [] },
-  approval: 'waiting'
+  quiz: { index: 0, score: 0, selected: null, finished: false }
 };
 
 const html = String.raw;
@@ -31,7 +30,9 @@ function saveState() {
 function route() {
   const hash = location.hash || '#/home';
   const parts = hash.slice(2).split('/').filter(Boolean);
-  return { page: parts[0] || 'home', id: parts[1] || null };
+  // The old Playground and Research Lab routes now live in the Workflow Builder.
+  const page = ['playground', 'research-lab'].includes(parts[0]) ? 'build' : parts[0] || 'home';
+  return { page, id: page === parts[0] ? parts[1] || null : null };
 }
 
 function navTo(path) {
@@ -59,7 +60,7 @@ function topNav(active) {
       <nav class="desktop-nav" aria-label="Primary navigation">
         <button class="nav-link ${active === 'concepts' ? 'is-active' : ''}" data-nav="concepts">${icon('book-open')}<span>Learn</span></button>
         <button class="nav-link ${active === 'paths' ? 'is-active' : ''}" data-nav="paths">${icon('route')}<span>Paths</span></button>
-        <button class="nav-link ${active === 'playground' ? 'is-active' : ''}" data-nav="playground">${icon('code')}<span>Play</span></button>
+        <button class="nav-link ${active === 'build' ? 'is-active' : ''}" data-nav="build">${icon('diagram-project')}<span>Build</span></button>
         <a class="nav-link github-link" href="https://github.com/89Omer/agentic-ai-master-guide" target="_blank" rel="noreferrer">${icon('github')} GitHub</a>
         <button class="primary-button compact" data-nav="paths">Start Learning <span>→</span></button>
       </nav>
@@ -68,7 +69,7 @@ function topNav(active) {
     <div class="mobile-nav" data-mobile-nav hidden>
       <button data-nav="concepts">Explore Concepts</button>
       <button data-nav="paths">Learning Paths</button>
-      <button data-nav="playground">Playground</button>
+      <button data-nav="build">Workflow Builder</button>
       <button data-nav="projects">Projects</button>
       <button data-nav="quiz">Quiz</button>
     </div>
@@ -137,15 +138,15 @@ function homePage() {
         <span class="living-kicker">Learn · Build · Explore together</span>
         <h1>Agentic AI<br>Master Guide</h1>
         <p class="living-deck">Understand how agents think, act, and improve.</p>
-        <p class="living-summary">A free, open-source map of 136 connected concepts, practical projects, and interactive playgrounds—designed to run lightly in your browser.</p>
+        <p class="living-summary">A free, open-source map of ${concepts.length} connected concepts, plus a Workflow Builder where you design agents, run them against tests and fix what breaks. Runs entirely in your browser.</p>
         <div class="living-actions">
           <button class="living-primary" data-nav="concepts">Explore the map <span aria-hidden="true">→</span></button>
           <button class="living-secondary" data-guide-open>${icon('book-open')} Ask the guide</button>
         </div>
         <div class="living-stats" aria-label="Guide facts">
-          <span><strong>136</strong> concepts</span>
-          <span><strong>8</strong> projects</span>
-          <span><strong>4</strong> playgrounds</span>
+          <span><strong>${concepts.length}</strong> concepts</span>
+          <span><strong>${projects.length}</strong> projects</span>
+          <span><strong>${TEMPLATES.length}</strong> buildable patterns</span>
           <span><strong>0</strong> runtime dependencies</span>
         </div>
       </div>
@@ -255,7 +256,7 @@ function conceptPage(id) {
         <section class="lesson-section visual-section"><span class="section-number">03</span><div><h2>See it</h2>${diagramFor(c)}</div></section>
         <section class="lesson-section"><span class="section-number">04</span><div><h2>Example</h2><div class="example-box"><strong>Example</strong><p>${c.example}</p></div></div></section>
         <section class="lesson-section"><span class="section-number">05</span><div><h2>How it fails</h2><div class="warning-box"><strong>Common mistake</strong><p>${c.mistake}</p></div></div></section>
-        <section class="lesson-section"><span class="section-number">06</span><div><h2>Try it</h2><div class="practice-box"><p>${c.practice}</p><button class="primary-button" data-nav="playground">Open Playground →</button></div></div></section>
+        <section class="lesson-section"><span class="section-number">06</span><div><h2>Try it</h2><div class="practice-box"><p>${c.practice}</p><button class="primary-button" data-nav="build/${templateForConcept(c)}">Build it in the Workflow Builder →</button></div></div></section>
       </article>
       <aside class="lesson-side">
         <div class="side-block"><span class="eyebrow">WHEN TO USE IT</span><p>${c.when}</p></div>
@@ -304,48 +305,10 @@ function pathPage(id) {
   `,'paths');
 }
 
-function playgroundPage() {
-  const tabs = [['loop','Agent Loop'],['tools','Tool Router'],['rag','RAG Lab'],['approval','Human Approval']];
-  return shell(html`
-    <section class="page-width page-intro"><span class="eyebrow">PLAYGROUND</span><h1>Learn by changing the system</h1><p>No API key. No setup. These simulations teach the decisions underneath real agent architectures.</p></section>
-    <section class="page-width playground-shell">
-      <div class="play-tabs">${tabs.map(([id,label])=>`<button class="${state.playgroundTab===id?'active':''}" data-play-tab="${id}">${label}</button>`).join('')}</div>
-      <div class="play-content">${playgroundContent()}</div>
-    </section>
-  `,'playground');
-}
-
-function playgroundContent() {
-  if (state.playgroundTab === 'tools') return toolRouterLab();
-  if (state.playgroundTab === 'rag') return ragLab();
-  if (state.playgroundTab === 'approval') return approvalLab();
-  return loopLab();
-}
-
-function loopLab() {
-  const s=state.loop;
-  const phases=['Plan','Act','Observe','Verify'];
-  return html`<div class="lab-grid"><div class="lab-main"><span class="eyebrow">LOOP ENGINEERING</span><h2>Control the agent loop</h2><p>Change the loop budget and when the task should succeed. Then step through the trajectory and watch the stopping rule.</p><div class="lab-controls"><label>Maximum iterations <input type="range" min="1" max="8" value="${s.max}" data-loop-max><strong>${s.max}</strong></label><label>Success on iteration <input type="range" min="1" max="8" value="${s.successAt}" data-loop-success><strong>${s.successAt}</strong></label></div><div class="loop-simulator">${phases.map((p,i)=>`<div class="sim-step ${s.running && s.step===i?'current':''}"><small>0${i+1}</small><strong>${p}</strong><span>${['Choose the next useful move','Execute the selected action','Read the result','Check success criteria'][i]}</span></div>`).join('')}</div><div class="lab-actions"><button class="secondary-button" data-loop-reset>Reset</button><button class="primary-button" data-loop-step>${s.running?'Next step':'Start loop'} →</button></div></div><aside class="lab-log"><span class="eyebrow">TRACE</span><h3>What the agent did</h3><div>${s.log.length?s.log.map(x=>`<p>${x}</p>`).join(''):'<p class="muted">Run the loop to see its trajectory.</p>'}</div></aside></div>`;
-}
-
-function toolRouterLab() {
-  return html`<div class="lab-grid"><div class="lab-main"><span class="eyebrow">TOOL SELECTION</span><h2>Which tool should the agent choose?</h2><p>Try a request. The local router scores intent words against four tool descriptions, similar to the problem a model solves when tools are available.</p><form class="lab-query" data-tool-form><input name="query" value="What is 347 × 29?" aria-label="Tool routing request"><button class="primary-button">Route request →</button></form><div class="tool-grid"><div><strong>Calculator</strong><span>Arithmetic and numeric operations</span></div><div><strong>Knowledge</strong><span>Stable conceptual explanations</span></div><div><strong>Search</strong><span>Current or external information</span></div><div><strong>Email</strong><span>Draft or send a message</span></div></div><div class="tool-result" data-tool-result><span class="eyebrow">AGENT DECISION</span><strong>Waiting for a request.</strong></div></div><aside class="lab-log"><span class="eyebrow">WHAT TO NOTICE</span><h3>Descriptions are part of the architecture</h3><p>If two tools sound too similar, routing becomes ambiguous. Good tool descriptions state when the tool should and should not be used.</p><button class="text-link" data-concept="tool-selection">Learn Tool Selection →</button></aside></div>`;
-}
-
-function ragLab() {
-  return html`<div class="lab-grid"><div class="lab-main"><span class="eyebrow">RETRIEVAL</span><h2>See a tiny RAG pipeline</h2><p>Ask a question against three local knowledge chunks. The lab uses transparent word-overlap scoring so you can inspect why a chunk was retrieved.</p><div class="rag-docs"><article data-rag-doc><strong>Chunk A · Agents</strong><p>An AI agent can reason about a goal, choose actions, use tools and observe results.</p></article><article data-rag-doc><strong>Chunk B · RAG</strong><p>Retrieval-Augmented Generation fetches relevant external information and puts it into model context before generation.</p></article><article data-rag-doc><strong>Chunk C · MCP</strong><p>Model Context Protocol provides a standard way for AI applications to discover external tools and resources.</p></article></div><form class="lab-query" data-rag-form><input name="query" value="How does RAG give an agent knowledge?" aria-label="RAG query"><button class="primary-button">Retrieve →</button></form><div class="tool-result" data-rag-result><span class="eyebrow">RETRIEVAL RESULT</span><strong>Run retrieval to rank the chunks.</strong></div></div><aside class="lab-log"><span class="eyebrow">WHAT TO NOTICE</span><h3>Retrieval is not generation</h3><p>First the system finds evidence. Then a model can use that evidence to answer. Agentic RAG adds decisions about whether and how to retrieve again.</p><button class="text-link" data-concept="rag">Learn RAG →</button></aside></div>`;
-}
-
-function approvalLab() {
-  return html`<div class="lab-grid"><div class="lab-main"><span class="eyebrow">HUMAN-IN-THE-LOOP</span><h2>Put a human at the consequential step</h2><p>The agent has prepared an action. Decide whether the action should execute, be rejected or return for editing.</p><div class="approval-card"><div><span class="risk-pill">High impact</span><h3>Issue a £500 customer refund</h3><p>Reason: duplicate charge confirmed by transaction records. Evidence reviewed by the agent: 3 records.</p></div><div class="approval-status status-${state.approval}">${approvalStatusText()}</div><div class="approval-buttons"><button class="secondary-button" data-approval="rejected">Reject</button><button class="secondary-button" data-approval="editing">Request edit</button><button class="primary-button" data-approval="approved">Approve action</button></div></div></div><aside class="lab-log"><span class="eyebrow">DESIGN QUESTION</span><h3>What deserves approval?</h3><p>Use consequences, reversibility, confidence, policy and user expectations to decide. Approval gates should be targeted, not placed after every harmless step.</p><button class="text-link" data-concept="human-in-loop">Learn HITL →</button></aside></div>`;
-}
-
-function approvalStatusText(){ return {waiting:'Waiting for authorised human review.',approved:'Approved. The workflow may continue to the refund tool.',rejected:'Rejected. The action is blocked and logged.',editing:'Returned to the agent with a request to revise.'}[state.approval]; }
-
 function projectsPage() {
   return shell(html`
     <section class="page-width page-intro"><span class="eyebrow">PROJECTS</span><h1>Build the ideas in increasing depth</h1><p>Projects start concept-first. You can later replace each simulation with your preferred SDK or framework.</p></section>
-    <section class="page-width projects-grid">${projects.map((p,i)=>`<article class="project-card"><div><span class="project-number">${String(i+1).padStart(2,'0')}</span><span class="level-pill">${p.level}</span></div><h2>${p.title}</h2><p>${p.summary}</p><div class="project-concepts">${p.concepts.map(id=>`<button data-concept="${id}">${shortTitle(conceptById[id].title)}</button>`).join('')}</div><details><summary>Project steps</summary><ol>${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol></details>${p.id==='first-agent'||p.id==='reliable-loop'?'<button class="primary-button" data-nav="playground">Open related playground →</button>':''}</article>`).join('')}</section>
+    <section class="page-width projects-grid">${projects.map((p,i)=>`<article class="project-card"><div><span class="project-number">${String(i+1).padStart(2,'0')}</span><span class="level-pill">${p.level}</span></div><h2>${p.title}</h2><p>${p.summary}</p><div class="project-concepts">${p.concepts.map(id=>`<button data-concept="${id}">${shortTitle(conceptById[id].title)}</button>`).join('')}</div><details><summary>Project steps</summary><ol>${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol></details>${p.id==='first-agent'||p.id==='reliable-loop'?'<button class="primary-button" data-nav="build/agent">Build it in the Workflow Builder →</button>':''}</article>`).join('')}</section>
   `,'projects');
 }
 
@@ -395,7 +358,7 @@ function askGuide(question){
   const q=question.trim(); if(!q)return;
   const n=normalize(q);
   if(n.includes('quiz')) { state.assistant={title:'Quiz mode',text:'I can test your understanding with short questions and explain any concept you miss.',actions:[{label:'Start the quiz',path:'quiz'}]}; render(); return; }
-  if(n.includes('build my first agent') || (n.includes('first')&&n.includes('agent')&&n.includes('build'))) { const c=conceptById.agent; state.assistant={title:'Build your first agent',text:'Start with a tiny goal-directed loop: define a goal, choose from two actions, observe the result and stop on success or after a small budget.',matches:[c,conceptById['agent-loop'],conceptById['stopping-condition']],actions:[{label:'Open the Playground',path:'playground'},{label:'See Projects',path:'projects'}]}; render(); return; }
+  if(n.includes('build my first agent') || (n.includes('first')&&n.includes('agent')&&n.includes('build'))) { const c=conceptById.agent; state.assistant={title:'Build your first agent',text:'Start with a tiny goal-directed loop: define a goal, choose from two actions, observe the result and stop on success or after a small budget.',matches:[c,conceptById['agent-loop'],conceptById['stopping-condition']],actions:[{label:'Build an agent',path:'build/agent'},{label:'See Projects',path:'projects'}]}; render(); return; }
   if(n.includes('completely new') || n.includes('new to ai') || n.includes("don't know") || n.includes('dont know')) { state.assistant={title:'Start from zero',text:'Begin with the difference between AI, a language model and an agent. Once those three are clear, tools, memory and loops become much easier.',matches:[conceptById['artificial-intelligence'],conceptById['large-language-model'],conceptById.agent],actions:[{label:'Start Beginner Path',path:'path/beginner'}]}; render(); return; }
   const vs=q.split(/\s+(?:vs\.?|versus|compared to|difference between)\s+/i);
   if(vs.length===2){ const a=findConceptByPhrase(vs[0]), b=findConceptByPhrase(vs[1]); if(a&&b){ state.assistant={title:`${shortTitle(a.title)} vs ${shortTitle(b.title)}`,text:`They solve different layers of an agent system. ${a.title} is about ${lowerFirst(a.short)} ${b.title} is about ${lowerFirst(b.short)}`,compare:{a,b}}; render(); return; } }
@@ -418,11 +381,12 @@ function render(){
   else if(r.page==='concept') app.innerHTML=conceptPage(r.id);
   else if(r.page==='paths') app.innerHTML=pathsPage();
   else if(r.page==='path') app.innerHTML=pathPage(r.id);
-  else if(r.page==='playground') app.innerHTML=playgroundPage();
+  else if(r.page==='build') app.innerHTML=shell(builderPage(r.id),'build');
   else if(r.page==='projects') app.innerHTML=projectsPage();
   else if(r.page==='quiz') app.innerHTML=quizPage();
   else app.innerHTML=homePage();
   bindEvents();
+  if(r.page==='build') bindBuilder(render);
 }
 
 function bindEvents(){
@@ -440,41 +404,9 @@ function bindEvents(){
   const search=document.querySelector('[data-concept-search]'); if(search){ search.addEventListener('input',()=>{const fd=new FormData(search);state.conceptFilter={q:String(fd.get('q')||''),category:String(fd.get('category')||'all'),level:String(fd.get('level')||'all')};render();}); search.addEventListener('change',()=>{const fd=new FormData(search);state.conceptFilter={q:String(fd.get('q')||''),category:String(fd.get('category')||'all'),level:String(fd.get('level')||'all')};render();}); }
   document.querySelectorAll('[data-toggle-complete]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.toggleComplete;state.completed.has(id)?state.completed.delete(id):state.completed.add(id);saveState();render()}));
   document.querySelectorAll('[data-toggle-bookmark]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.toggleBookmark;state.bookmarks.has(id)?state.bookmarks.delete(id):state.bookmarks.add(id);saveState();render()}));
-  document.querySelectorAll('[data-play-tab]').forEach(el=>el.addEventListener('click',()=>{state.playgroundTab=el.dataset.playTab;render()}));
-  const max=document.querySelector('[data-loop-max]'); if(max)max.addEventListener('input',e=>{state.loop.max=Number(e.target.value);if(state.loop.successAt>state.loop.max)state.loop.successAt=state.loop.max;render()});
-  const success=document.querySelector('[data-loop-success]'); if(success)success.addEventListener('input',e=>{state.loop.successAt=Number(e.target.value);render()});
-  const loopStep=document.querySelector('[data-loop-step]'); if(loopStep)loopStep.addEventListener('click',stepLoop);
-  const loopReset=document.querySelector('[data-loop-reset]'); if(loopReset)loopReset.addEventListener('click',()=>{state.loop={...state.loop,step:0,iteration:1,running:false,log:[]};render()});
-  const toolForm=document.querySelector('[data-tool-form]'); if(toolForm)toolForm.addEventListener('submit',e=>{e.preventDefault();routeTool(String(new FormData(toolForm).get('query')||''))});
-  const ragForm=document.querySelector('[data-rag-form]'); if(ragForm)ragForm.addEventListener('submit',e=>{e.preventDefault();runRag(String(new FormData(ragForm).get('query')||''))});
-  document.querySelectorAll('[data-approval]').forEach(el=>el.addEventListener('click',()=>{state.approval=el.dataset.approval;render()}));
   document.querySelectorAll('[data-quiz-answer]').forEach(el=>el.addEventListener('click',()=>{const i=Number(el.dataset.quizAnswer);state.quiz.selected=i;if(i===quizzes[state.quiz.index].answer)state.quiz.score++;render()}));
   const next=document.querySelector('[data-quiz-next]'); if(next)next.addEventListener('click',()=>{if(state.quiz.index===quizzes.length-1)state.quiz.finished=true;else{state.quiz.index++;state.quiz.selected=null;}render()});
   const restart=document.querySelector('[data-quiz-restart]'); if(restart)restart.addEventListener('click',()=>{state.quiz={index:0,score:0,selected:null,finished:false};render()});
-}
-
-function stepLoop(){
-  const s=state.loop;
-  if(!s.running){s.running=true;s.step=0;s.iteration=1;s.log=[`Iteration 1 · Plan: choose the next useful move.`];render();return;}
-  if(s.step<3){s.step++;s.log.push(`Iteration ${s.iteration} · ${['Plan','Act','Observe','Verify'][s.step]}: ${['','execute selected action.','inspect the result.','compare result with success criteria.'][s.step]}`);render();return;}
-  if(s.iteration>=s.successAt){s.log.push(`Success condition met on iteration ${s.iteration}. Loop stopped.`);s.running=false;s.step=0;render();return;}
-  if(s.iteration>=s.max){s.log.push(`Loop budget exhausted after ${s.max} iteration${s.max===1?'':'s'}. Escalate or fail safely.`);s.running=false;s.step=0;render();return;}
-  s.iteration++;s.step=0;s.log.push(`Iteration ${s.iteration} · Plan: previous result was not sufficient, so revise the next move.`);render();
-}
-
-function routeTool(query){
-  const n=normalize(query); let tool='Knowledge',why='The request looks conceptual and does not require an external action.';
-  if(/[0-9]/.test(query)&&(/[+*×\/\-]/.test(query)||n.includes('calculate')||n.includes('percent'))){tool='Calculator';why='The request contains a numeric operation, so deterministic calculation is preferable to estimation.';}
-  else if(['today','latest','current','news','price','weather','find online'].some(k=>n.includes(k))){tool='Search';why='The request depends on current or external information.';}
-  else if(['email','message','send','reply'].some(k=>n.includes(k))){tool='Email';why='The user is asking for a communication action.';}
-  const el=document.querySelector('[data-tool-result]'); if(el)el.innerHTML=`<span class="eyebrow">AGENT DECISION</span><strong>${tool}</strong><p>${why}</p>`;
-}
-
-function runRag(query){
-  const docs=[['Chunk A · Agents','An AI agent can reason about a goal, choose actions, use tools and observe results.'],['Chunk B · RAG','Retrieval-Augmented Generation fetches relevant external information and puts it into model context before generation.'],['Chunk C · MCP','Model Context Protocol provides a standard way for AI applications to discover external tools and resources.']];
-  const tokens=normalize(query).split(' ').filter(x=>x.length>2);
-  const ranked=docs.map(([title,text])=>{ const titleTokens=normalize(title).split(' '); return {title,text,score:tokens.reduce((s,t)=>s+(titleTokens.includes(t)?6:(normalize(title).includes(t)?2:0))+(normalize(text).includes(t)?1:0),0)}; }).sort((a,b)=>b.score-a.score);
-  const el=document.querySelector('[data-rag-result]'); if(el)el.innerHTML=`<span class="eyebrow">RETRIEVAL RESULT</span>${ranked.map((d,i)=>`<div class="ranked-chunk"><strong>#${i+1} ${d.title}</strong><span>${d.score} matching signals</span><p>${d.text}</p></div>`).join('')}`;
 }
 
 window.addEventListener('hashchange',render);

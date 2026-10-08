@@ -1,8 +1,8 @@
 # Agentic AI Master Guide
 
-Most agentic AI guides are reading lists with diagrams. This one makes you run experiments.
+Most agentic AI guides are reading lists with diagrams. This one makes you build agents and watch them fail.
 
-The **Research Lab** follows a research loop: **Question → Hypothesis → Experiment → Trace → Metric → Failure**. Learners A/B test clear versus vague tool descriptions, repeat runs to expose the worst case, and break agents with prompt injection and poisoned memory. These are failure modes people usually learn the hard way, in production.
+The **Workflow Builder** gives you a working agent design and a set of tests, and some of the tests fail. You read the trace, change the design (add a guardrail, raise top-k, set a stop rule, require approval) and run the tests again. The failures are the ones people usually meet in production: made-up answers, prompt injection from a retrieved page, poisoned memory, runaway loops and data sent to the wrong person.
 
 Everything runs in the browser. No API key, no backend, no sign-up, so it works on locked-down student machines too.
 
@@ -10,13 +10,12 @@ Everything runs in the browser. No API key, no backend, no sign-up, so it works 
 
 ## What is included
 
-- A browser-local **Research Lab** with Agent Observatory, Tool A/B testing, Planning Strategy comparison, Repeated-Run reliability evaluation, Break the Agent adversarial experiments, and a Long-Horizon changing-environment simulation.
+- A **Workflow Builder** with six buildable patterns (router, RAG, tool-using agent, answer + critic, human approval, memory), each with a test suite, a step-by-step trace and a challenge.
 - **183 connected concepts** across AI foundations, agents, tools/protocols/interoperability, memory and RAG, loop engineering, multi-agent systems, agent engineering, safety, and evaluation.
 - **Ask the guide**: type a question and a local keyword-and-intent matcher points you to the relevant concepts. It is search, not a chatbot. There is no model behind it.
 - **Beginner, Developer, and Researcher** learning paths with browser-saved progress.
 - Concept lessons using a consistent teaching pattern: explanation, why it matters, how it works, visual model, example, failure mode, practice, and next concepts.
 - **Simple, Developer, and Research** depth modes on concept pages, including implementation prompts, research questions, evaluation methods, maturity labels, and suggested references.
-- Interactive **Agent Loop, Tool Routing, RAG, and Human Approval** playgrounds.
 - Optional shared **read counts and Most Read analytics** using GoatCounter, with no analytics enabled until a site code is configured.
 - **11 guided projects** and a built-in quiz.
 - Modern production topics including **Harness Engineering, Context Compaction, Agent Skills, Long-Running Agents, Durable Execution, MCP lifecycle features, A2A, AG-UI, Agent Runtime, Guardrails, Red-Team Evaluation, and Agent Drift**.
@@ -40,7 +39,7 @@ npm test
 npm run build
 ```
 
-The smoke tests validate the core guide, RAG answer layer, Research Lab, analytics modules, and JavaScript syntax before deployment. The build command creates a deployable `dist/` directory and, when analytics is configured, refreshes the Most Read dataset.
+The smoke tests check the core guide and analytics modules, and run every Workflow Builder template through the engine to confirm it fails and gets fixed as designed. The build command creates a deployable `dist/` directory and, when analytics is configured, refreshes the Most Read dataset.
 
 ## Deploy to GitHub Pages
 
@@ -50,24 +49,34 @@ The smoke tests validate the core guide, RAG answer layer, Research Lab, analyti
 4. Push to `master` or manually run the included **Deploy Agentic AI Master Guide to GitHub Pages** workflow.
 5. GitHub publishes the generated `dist/` site.
 
-The app uses hash routes such as `#/concept/...` and `#/research-lab`, so direct navigation works on project GitHub Pages without server rewrite rules.
+The app uses hash routes such as `#/concept/...` and `#/build/rag`, so direct navigation works on project GitHub Pages without server rewrite rules.
 
-## Research Lab
+## Workflow Builder
 
-The Research Lab changes the learning pattern from reading definitions to investigating agent behaviour:
+Open `#/build`. Each pattern comes with a starting design, a test suite and a challenge:
 
-**Question → Hypothesis → Experiment → Trace → Metric → Failure → Explanation**
+| Pattern | Starts at | What the failing tests teach |
+|---|---|---|
+| Router workflow | 3/4 | Route descriptions decide routing; unanswerable questions get made-up answers |
+| RAG assistant | 1/4 | Top-k too low, a poisoned document, no grounding check |
+| Tool-using agent | 2/4 | No stop rule (runaway loop), a web page that makes the agent email an attacker |
+| Answer + critic | 2/3 | A critic improves coverage but cannot invent missing sources |
+| Agent with human approval | 3/3 | Swap approval for an allowlist and a legitimate email gets blocked |
+| Assistant with memory | 0/3 | One poisoned memory corrupts every answer |
 
-The initial stations are:
+Learners add, remove and reorder steps (Router, Tool, Answer, Agent loop, Critic, Guardrail), edit tool and route descriptions, and change settings such as top-k or maximum iterations. Every run reports pass/fail per test plus model calls, tool calls, estimated tokens and human reviews, so learners can compare designs on cost as well as correctness. Failure messages link back to the relevant concept page, and each concept page links to the matching pattern.
 
-- **Agent Observatory** — inspect a complete multi-step trajectory and open individual decisions.
-- **Tool A/B** — compare clear vs ambiguous tool descriptions over a 20-request benchmark.
-- **Planning Lab** — compare Direct, ReAct, Plan → Execute, and Planner + Verifier architectures as constraints increase.
-- **Repeated Runs** — run the same simulated architecture 5, 10, or 20 times and inspect success, groundedness, iterations, cost, and the worst run.
-- **Break the Agent** — test stopping failures, ambiguous tools, retrieved prompt injection, poisoned memory, and budget exhaustion, then apply a control and rerun.
-- **Long-Horizon** — manage a workshop-planning agent while budget, availability, and accessibility constraints change during the run.
+### How the simulated model works
 
-These are transparent browser simulations designed to teach architecture and evaluation. They do not claim to reproduce the stochastic behaviour of a specific hosted LLM.
+There is no LLM behind the builder. The engine (`src/builder-engine.js`) uses a small, deterministic set of rules, and those rules are shown in the UI:
+
+1. It chooses routes and tools by matching the request against the descriptions the learner wrote.
+2. It splits a request into parts and works through them in order.
+3. It answers only from its context, and makes up a confident answer for any part with no source.
+4. It follows instructions found inside documents, web pages or memory unless a guardrail removed them.
+5. Inside an agent loop it keeps trying while any part is unanswered; only a stop rule ends the loop.
+
+Because the rules are fixed, every change in results comes from the learner's design rather than from randomness or results written in advance. Real models fail in messier and less predictable ways; the builder teaches the structural causes, not exact model behaviour.
 
 ## Views and Most Read analytics
 
@@ -98,13 +107,10 @@ Aptos is **not bundled** with this repository. Devices that already have Aptos i
 - `src/data-base.js` — original foundations, learning paths, projects, quizzes, and detailed concept explanations.
 - `src/production-concepts.js` — modern production Agentic AI, protocol, runtime, interoperability, guardrail, and evaluation concepts.
 - `src/data.js` — integration layer that combines both sources into the live knowledge graph.
-- `src/playground-context.js` — concept-aware practice routing.
-- `src/rag-lab-upgrade.js` — local RAG retrieval-and-answer teaching layer.
-- `src/research-state.js` — shared research-lab state and experiment metadata.
-- `src/research-stations-a.js` / `src/research-stations-b.js` — experiment stations.
-- `src/research-experiments.js` — station routing and event binding.
-- `src/research-concept-mode.js` — Simple / Developer / Research lesson modes and Research Lab entry points.
-- `src/research-lab.js` / `src/research-lab.css` — Research Lab page integration and visual layer.
+- `src/builder-engine.js` — Workflow Builder execution engine and grader (no DOM; also used by the smoke tests).
+- `src/builder-templates.js` — the fictional course handbook, pattern templates, test suites and concept-to-pattern mapping.
+- `src/builder.js` / `src/builder.css` — Workflow Builder editor, test runner and trace view.
+- `src/concept-modes.js` / `src/concept-modes.css` — Simple / Developer / Research lesson modes and builder entry points.
 - `src/analytics-config.js` — optional public analytics configuration.
 - `src/analytics.js` / `src/analytics.css` — SPA tracking, concept counts, site totals, Most Read UI, and popularity sorting.
 - `scripts/build-popular.mjs` — build-time aggregation of weekly concept counts.
@@ -121,4 +127,4 @@ The UI is inspired by the spacious, component-led visual language of the public 
 
 ## Roadmap
 
-Useful next additions include real optional model-backed experiments behind a safe server boundary, richer concept-level citations, exportable experiment results, community benchmark packs, more environment simulations, and accessibility/localisation passes.
+Useful next additions include exporting a workflow as n8n JSON or Python code, more patterns (prompt chaining, orchestrator–workers, plan-and-execute), learner-written test cases, richer concept-level citations, and accessibility/localisation passes.

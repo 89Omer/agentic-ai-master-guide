@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Learn agentic AI by running experiments. A free, browser-only Research Lab: A/B test tool descriptions, repeat runs to find the worst case, and break agents with prompt injection and poisoned memory. No API key needed.">
+  <meta name="description" content="Learn agentic AI by building agents in your browser. Design a workflow, run it against tests, read the trace when it fails, and fix it: prompt injection, made-up answers, runaway loops and leaked data. No API key needed.">
   <meta name="theme-color" content="#0b3427">
   <title>Agentic AI Master Guide</title>
   <link rel="canonical" href="https://89omer.github.io/agentic-ai-master-guide/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Agentic AI Master Guide">
-  <meta property="og:title" content="Agentic AI Master Guide: experiment with agents, don't just read about them">
-  <meta property="og:description" content="A free, browser-only Research Lab for agentic AI. Run experiments, inspect traces, measure results and break agents on purpose. No API key needed.">
+  <meta property="og:title" content="Agentic AI Master Guide: build agents, break them, fix them">
+  <meta property="og:description" content="A free Workflow Builder for agentic AI. Design RAG, agent loops and human approval workflows, run them against tests and fix what breaks. Runs in the browser with no API key.">
   <meta property="og:url" content="https://89omer.github.io/agentic-ai-master-guide/">
   <meta property="og:image" content="https://89omer.github.io/agentic-ai-master-guide/public/assets/living-systems-map.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="675">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="./src/styles.css">
-  <link rel="stylesheet" href="./src/research-lab.css">
+  <link rel="stylesheet" href="./src/concept-modes.css">
+  <link rel="stylesheet" href="./src/builder.css">
   <link rel="stylesheet" href="./src/analytics.css">
 </head>
 <body>
@@ -25,9 +26,9 @@
   <noscript>
     <main style="max-width:720px;margin:48px auto;padding:0 20px;font-family:Aptos,'Segoe UI',Arial,sans-serif;line-height:1.6">
       <h1>Agentic AI Master Guide</h1>
-      <p>An interactive guide that teaches agentic AI through experiments. Its Research Lab follows a research loop: Question, Hypothesis, Experiment, Trace, Metric, Failure.</p>
+      <p>An interactive guide that teaches agentic AI by building. In the Workflow Builder you design an agent, run it against tests, read the trace when it fails and fix the design until every test passes.</p>
       <ul>
-        <li><strong>Research Lab:</strong> Agent Observatory, Tool A/B testing, Planning Lab, Repeated Runs, Break the Agent (prompt injection, poisoned memory, budget exhaustion) and Long-Horizon simulations.</li>
+        <li><strong>Workflow Builder:</strong> six buildable patterns (router, RAG, tool-using agent, answer + critic, human approval, memory), each with tests covering prompt injection, poisoned memory, made-up answers, runaway loops and data leaks.</li>
         <li><strong>183 connected concepts</strong>, from foundations to harness engineering, context compaction, MCP, A2A, AG-UI, guardrails and agent drift. Each one includes a failure mode.</li>
         <li><strong>Learning paths</strong> for beginners, developers and researchers, plus 11 guided projects and a quiz.</li>
       </ul>
@@ -36,10 +37,7 @@
     </main>
   </noscript>
   <script type="module" src="./src/app.js"></script>
-  <script type="module" src="./src/playground-context.js"></script>
-  <script type="module" src="./src/rag-lab-upgrade.js"></script>
-  <script type="module" src="./src/playground-health.js"></script>
-  <script type="module" src="./src/research-lab.js"></script>
+  <script type="module" src="./src/concept-modes.js"></script>
   <script type="module" src="./src/analytics.js"></script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+/* Simple / Developer / Research lesson modes on concept pages */
+.concept-mode-switch{display:flex;gap:6px;margin-top:18px;width:max-content;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.concept-mode-switch button{padding:8px 13px;border-radius:999px;font-weight:750;color:var(--muted)}
+.concept-mode-switch button.active{background:var(--text);color:#fff}
+.concept-mode-panel{margin:0 0 22px;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}
+.concept-mode-panel h3{margin:0 0 8px}
+.concept-mode-panel p{color:var(--muted)}
+.concept-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.concept-mode-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface-soft)}
+.concept-mode-card strong{display:block;margin-bottom:8px}
+.concept-mode-card ul,.concept-mode-card ol{margin:0;padding-left:20px}
+.concept-mode-card li{margin:7px 0}
+.maturity-chip{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:800;margin-bottom:10px}
+@media(max-width:760px){.concept-mode-grid{grid-template-columns:1fr}}

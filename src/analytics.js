@@ -26,8 +26,7 @@ function trackingAllowed() {
 function titleForRoute() {
   const id = currentConceptId();
   if (id && conceptById[id]) return `${conceptById[id].title} · Agentic AI Master Guide`;
-  if (currentHash().startsWith('#/research-lab')) return 'Research Lab · Agentic AI Master Guide';
-  if (currentHash().startsWith('#/playground')) return 'Playground · Agentic AI Master Guide';
+  if (/^#\/(build|playground|research-lab)/.test(currentHash())) return 'Workflow Builder · Agentic AI Master Guide';
   return document.title;
 }
 
