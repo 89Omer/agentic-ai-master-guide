@@ -1,16 +1,22 @@
 # Agentic AI Master Guide
 
-An open-source, interactive learning guide that teaches Agentic AI from first principles to advanced agent systems. The interface is conversation-led: learners can ask what they want to understand, get matched to the right concepts, jump directly into an explanation, practise through interactive simulations, and run small experiments on agent behaviour.
+Most agentic AI guides are reading lists with diagrams. This one makes you run experiments.
+
+The **Research Lab** follows a research loop: **Question → Hypothesis → Experiment → Trace → Metric → Failure**. Learners A/B test clear versus vague tool descriptions, repeat runs to expose the worst case, and break agents with prompt injection and poisoned memory. These are failure modes people usually learn the hard way, in production.
+
+Everything runs in the browser. No API key, no backend, no sign-up, so it works on locked-down student machines too.
+
+**Live site:** https://89omer.github.io/agentic-ai-master-guide/
 
 ## What is included
 
+- A browser-local **Research Lab** with Agent Observatory, Tool A/B testing, Planning Strategy comparison, Repeated-Run reliability evaluation, Break the Agent adversarial experiments, and a Long-Horizon changing-environment simulation.
 - **183 connected concepts** across AI foundations, agents, tools/protocols/interoperability, memory and RAG, loop engineering, multi-agent systems, agent engineering, safety, and evaluation.
-- A **local Guide** that maps natural-language questions to relevant concepts without an API key or backend.
+- **Ask the guide**: type a question and a local keyword-and-intent matcher points you to the relevant concepts. It is search, not a chatbot. There is no model behind it.
 - **Beginner, Developer, and Researcher** learning paths with browser-saved progress.
 - Concept lessons using a consistent teaching pattern: explanation, why it matters, how it works, visual model, example, failure mode, practice, and next concepts.
 - **Simple, Developer, and Research** depth modes on concept pages, including implementation prompts, research questions, evaluation methods, maturity labels, and suggested references.
 - Interactive **Agent Loop, Tool Routing, RAG, and Human Approval** playgrounds.
-- A browser-local **Research Lab** with Agent Observatory, Tool A/B testing, Planning Strategy comparison, Repeated-Run reliability evaluation, adversarial failure experiments, and a Long-Horizon changing-environment simulation.
 - Optional shared **read counts and Most Read analytics** using GoatCounter, with no analytics enabled until a site code is configured.
 - **11 guided projects** and a built-in quiz.
 - Modern production topics including **Harness Engineering, Context Compaction, Agent Skills, Long-Running Agents, Durable Execution, MCP lifecycle features, A2A, AG-UI, Agent Runtime, Guardrails, Red-Team Evaluation, and Agent Drift**.
