@@ -52,14 +52,14 @@ function topNav(active) {
   return html`
     <header class="topbar">
       <button class="brand" data-nav="home" aria-label="Go to home">
-        <span class="brand-mark">${icon('layer-group')}</span>
+        <span class="brand-mark"><img src="./public/assets/path-beginner.png" alt=""></span>
         <span>Agentic AI Master Guide</span>
         <span class="open-badge">Open Source</span>
       </button>
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <button class="nav-link ${active === 'concepts' ? 'is-active' : ''}" data-nav="concepts">Explore Concepts</button>
-        <button class="nav-link ${active === 'paths' ? 'is-active' : ''}" data-nav="paths">Learning Paths</button>
-        <button class="nav-link ${active === 'playground' ? 'is-active' : ''}" data-nav="playground">Playground</button>
+        <button class="nav-link ${active === 'concepts' ? 'is-active' : ''}" data-nav="concepts">${icon('book-open')}<span>Learn</span></button>
+        <button class="nav-link ${active === 'paths' ? 'is-active' : ''}" data-nav="paths">${icon('route')}<span>Paths</span></button>
+        <button class="nav-link ${active === 'playground' ? 'is-active' : ''}" data-nav="playground">${icon('code')}<span>Play</span></button>
         <a class="nav-link github-link" href="https://github.com/89Omer/agentic-ai-master-guide" target="_blank" rel="noreferrer">${icon('github')} GitHub</a>
         <button class="primary-button compact" data-nav="paths">Start Learning <span>→</span></button>
       </nav>
@@ -123,63 +123,51 @@ function homePage() {
   const pathCards = learningPaths.map(path => {
     const p = progressForPath(path);
     const pathImage = { beginner:'./public/assets/path-beginner.png', developer:'./public/assets/path-developer.png', researcher:'./public/assets/path-researcher.png' }[path.id];
-    return html`<button class="path-card path-${path.id}" data-path="${path.id}">
+    return html`<button class="living-path-row path-${path.id}" data-path="${path.id}">
       <span class="path-icon"><img src="${pathImage}" alt=""></span>
       <span class="path-copy"><span class="path-title-row"><strong>${path.title}</strong><em>${path.badge}</em></span><span>${path.description}</span><small>${path.modules.length} modules · ~${path.hours} hours${p.complete ? ` · ${p.pct}% complete` : ''}</small></span>
-      <b>→</b>
+      <span class="path-outcome">${path.id === 'beginner' ? 'Build a solid foundation' : path.id === 'developer' ? 'Get hands-on' : 'Explore open problems'}</span>
+      <b aria-hidden="true">→</b>
     </button>`;
   }).join('');
 
-  const essential = categories.slice(0, 6).map(c => html`
-    <button class="essential-card" data-category="${c.id}">
-      <span class="concept-icon tone-${c.accent}">${icon(c.icon)}</span>
-      <span><strong>${c.title}</strong><small>${c.description}</small></span>
-      <b>→</b>
-    </button>`).join('');
-
   return shell(html`
-    <section class="hero page-width">
-      <img class="hero-decoration cube" src="./public/assets/hero-orb-cube.png" alt="">
-      <img class="hero-decoration orb" src="./public/assets/hero-orb-small.png" alt="">
-      <div class="hero-copy">
-        <h1>What do you want to <br>understand about <br>Agentic AI?</h1>
-        <p>A free, open-source guide to help you learn Agentic AI—from first principles to advanced systems. Built for complete beginners and advanced builders.</p>
-        <form class="hero-search" data-guide-form>
-          <span class="search-spark">✦</span>
-          <label class="sr-only" for="hero-question">Ask anything about Agentic AI</label>
-          <input id="hero-question" name="question" placeholder="Ask anything about Agentic AI…" autocomplete="off">
-          <button class="primary-circle" aria-label="Ask the guide">${icon('arrow-up')}</button>
-        </form>
-        <div class="quick-prompts">${quickPrompts.map((q, i) => `<button data-quick="${escapeAttr(q)}"><span>${['Start','Agent','Compare','Visual','Build','Quiz'][i]}</span>${q}</button>`).join('')}</div>
-      </div>
-      <div class="loop-feature-card">
-        <div class="feature-copy"><h2>Agent Loop</h2><p>The core cycle every agent follows to solve tasks and achieve goals.</p></div>
-        ${agentLoopDiagram('compact')}
-        <div class="feature-actions"><button class="secondary-button" data-explain="agent-loop">${icon('book-open')} Explain simply</button><button class="primary-button" data-concept="agent-loop">Take me there <span>→</span></button></div>
-      </div>
-    </section>
-
-    <section class="concept-ribbon page-width" aria-label="Core concept map">
-      <div class="ribbon-label">Core concepts and how<br>they connect</div>
-      <div class="ribbon-track ribbon-map">
-        <div class="ribbon-top">
-          ${ribbonButton('agent-loop')}
-          ${ribbonButton('multi-agent-system')}
+    <section class="living-hero">
+      <div class="living-hero-copy">
+        <span class="living-kicker">Learn · Build · Explore together</span>
+        <h1>Agentic AI<br>Master Guide</h1>
+        <p class="living-deck">Understand how agents think, act, and improve.</p>
+        <p class="living-summary">A free, open-source map of 136 connected concepts, practical projects, and interactive playgrounds—designed to run lightly in your browser.</p>
+        <div class="living-actions">
+          <button class="living-primary" data-nav="concepts">Explore the map <span aria-hidden="true">→</span></button>
+          <button class="living-secondary" data-guide-open>${icon('book-open')} Ask the guide</button>
         </div>
-        <div class="ribbon-bottom">
-          ${['agent','tool-use','working-memory','rag','mcp','agent-evaluation'].map((id,i,arr)=>`${ribbonButton(id)}${i<arr.length-1?'<span class="ribbon-connector">→</span>':''}`).join('')}
+        <div class="living-stats" aria-label="Guide facts">
+          <span><strong>136</strong> concepts</span>
+          <span><strong>8</strong> projects</span>
+          <span><strong>4</strong> playgrounds</span>
+          <span><strong>0</strong> runtime dependencies</span>
         </div>
       </div>
+      <div class="living-map-wrap">
+        <img src="./public/assets/living-systems-map.jpg" width="1200" height="675" alt="A living network connecting observation, planning, tools, action, collaboration, evaluation and memory around an Agentic AI core." fetchpriority="high">
+        <p>One connected system: perceive, plan, act, learn, and collaborate.</p>
+      </div>
     </section>
 
-    <section class="page-width section-block">
-      <div class="section-heading"><h2>Start with the essentials</h2><button data-nav="concepts">View all ${concepts.length} concepts →</button></div>
-      <div class="essentials-grid">${essential}</div>
+    <section class="living-paths">
+      <div class="living-section-head">
+        <div><span>Different starting points. One connected map.</span><h2>Choose your learning path.</h2></div>
+        <p>Your progress stays on this device. No account, tracking, or cloud sync required.</p>
+      </div>
+      <div class="living-path-list">${pathCards}</div>
     </section>
 
-    <section class="page-width section-block bottom-space">
-      <div class="section-heading"><h2>Choose your learning path</h2><button data-nav="paths">Compare paths →</button></div>
-      <div class="paths-grid">${pathCards}</div>
+    <section class="living-principles">
+      <div><span>01</span><strong>Local by default</strong><p>The guide works in your browser without sending learning activity elsewhere.</p></div>
+      <div><span>02</span><strong>Built to last</strong><p>Plain HTML, CSS, and JavaScript keep the project portable and easy to maintain.</p></div>
+      <div><span>03</span><strong>Useful before decorative</strong><p>Every visual helps learners understand a system, a decision, or a next step.</p></div>
+      <button data-nav="concepts">Browse all concepts <span aria-hidden="true">→</span></button>
     </section>
   `, 'home');
 }
@@ -439,6 +427,7 @@ function render(){
 
 function bindEvents(){
   document.querySelectorAll('[data-nav]').forEach(el=>el.addEventListener('click',()=>navTo(el.dataset.nav)));
+  document.querySelectorAll('[data-guide-open]').forEach(el=>el.addEventListener('click',()=>{state.assistant={title:'Ask the guide',text:'Tell me what you want to understand. I will connect your question to the most useful concepts and learning path.',actions:[{label:'Browse concepts',path:'concepts'},{label:'Choose a path',path:'paths'}]};render()}));
   document.querySelectorAll('[data-concept]').forEach(el=>el.addEventListener('click',()=>{state.assistant=null;navTo(`concept/${el.dataset.concept}`)}));
   document.querySelectorAll('[data-path]').forEach(el=>el.addEventListener('click',()=>navTo(`path/${el.dataset.path}`)));
   document.querySelectorAll('[data-category]').forEach(el=>el.addEventListener('click',()=>{state.conceptFilter.category=el.dataset.category;state.conceptFilter.q='';navTo('concepts')}));
